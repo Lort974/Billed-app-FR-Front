@@ -22,10 +22,24 @@ export default class NewBill {
     const fileName = filePath[filePath.length-1]
     const formData = new FormData()
     const email = JSON.parse(localStorage.getItem("user")).email
-    formData.append('file', file)
-    formData.append('email', email)
 
-    this.store
+    //ajouté/////////////////////////////////////////////////////////////
+    const fileExtension = fileName.split('.')[1]//ajouté
+    console.log(fileExtension)
+    const correctExtensions = ['jpg', 'jpeg', 'png']//ajouté
+    
+    if (!correctExtensions.includes(fileExtension)) {
+      this.document.querySelector(`input[data-testid="file"]`).value = ''
+      const error = document.createElement('div')
+      error.style.color = '#FF0000'
+      error.textContent = 'Veuillez sélectionner une image au format .jpg, .jpeg ou .png'
+      this.document.querySelector(`input[data-testid="file"]`).parentNode.appendChild(error)
+    }
+    else {
+      formData.append('file', file)
+      formData.append('email', email)
+
+      this.store
       .bills()
       .create({
         data: formData,
@@ -39,6 +53,10 @@ export default class NewBill {
         this.fileUrl = fileUrl
         this.fileName = fileName
       }).catch(error => console.error(error))
+    }
+    //ajouté/////////////////////////////////////////////////////////////
+
+
   }
   handleSubmit = e => {
     e.preventDefault()
