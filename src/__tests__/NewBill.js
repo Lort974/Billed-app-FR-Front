@@ -96,7 +96,7 @@ describe("Given I am connected as an employee", () => {
   })
   
   describe("When I fill the form correctly and send it", () => {
-    test("My new bill should be saved in the data base", () => {
+    test("My new bill should be sent", () => {
       const onNavigate = (pathname) => {
         document.body.innerHTML = ROUTES({ pathname })
       }

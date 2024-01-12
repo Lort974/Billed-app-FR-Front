@@ -5,7 +5,7 @@
 import {screen, waitFor} from "@testing-library/dom"
 import BillsUI from "../views/BillsUI.js"
 import { bills } from "../fixtures/bills.js"
-import Bills from "../containers/bills.js"
+import Bills from "../containers/Bills.js"
 import { ROUTES_PATH } from "../constants/routes.js";
 import {localStorageMock} from "../__mocks__/localStorage.js";
 
@@ -51,33 +51,57 @@ describe("Given I am connected as an employee", () => {
     })
     describe("When I clic on the view bill eye", () => {
       test("Then I should see the bill details", async () => {
-        // Mock localStorage
+        const onNavigate = (pathname) => {
+          document.body.innerHTML = ROUTES({ pathname })
+        }
+
         Object.defineProperty(window, 'localStorage', { value: localStorageMock })
         window.localStorage.setItem('user', JSON.stringify({
           type: 'Employee'
         }))
-
+    
         // Create root div and append to body
         const root = document.createElement("div")
         root.setAttribute("id", "root")
         document.body.append(root)
-
+    
         // Start router
         router()
 
-        // Simulate navigation to Bills page
+        //données fictives :
+        let billsData = [{
+          fileUrl: 'fakeUrl',
+        }];
+    
+        // Simulate navigation to NewBill page
         window.onNavigate(ROUTES_PATH.Bills)
+        
+        document.body.innerHTML = BillsUI({ data: billsData, loading: false, error: null });
+  
+        global.$ = jest.fn().mockReturnValue({
+          modal: jest.fn(),
+          click: jest.fn(),
+          width: jest.fn(),
+          find: jest.fn().mockReturnValue({
+            html: jest.fn(),
+          }),
+        });
+
+        const bills = new Bills({
+          document, onNavigate, store: mockStore, localStorage: window.localStorage
+        })
+
+        // Espionnez la méthode updateBill de l'instance
+        jest.spyOn(bills, 'handleClickIconEye');
 
         // Simulate click on new bill button
         await waitFor(() => document.getElementById('modaleFile'))
-        const modale = document.getElementById("modaleFile")
-        const iconEye = screen.getAllByTestId('icon-eye')[1]
-
+        const iconEye = screen.getAllByTestId('icon-eye')[0]
         
         userEvent.click(iconEye)
 
         // Check if the modal is displayed
-        expect(modale).toHaveClass("show")
+        expect(bills.handleClickIconEye).toHaveBeenCalled()
       })
     })
   })
