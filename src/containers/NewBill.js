@@ -15,19 +15,17 @@ export default class NewBill {
     this.billId = null
     new Logout({ document, localStorage, onNavigate })
   }
-  handleChangeFile = e => {
+  handleChangeFile = (e) => {
     e.preventDefault()
     const file = this.document.querySelector(`input[data-testid="file"]`).files[0]
-    console.log(file.name)
     //const filePath = e.target.value.split(/\\/g)
     const fileName = file.name
     const formData = new FormData()
     const email = JSON.parse(localStorage.getItem("user")).email
 
     //ajouté/////////////////////////////////////////////////////////////
-    const fileExtension = fileName.split('.')[1]//ajouté
-    console.log(fileExtension)
-    const correctExtensions = ['jpg', 'jpeg', 'png']//ajouté
+    const fileExtension = fileName.split('.')[1]
+    const correctExtensions = ['jpg', 'jpeg', 'png']
     
     if (!correctExtensions.includes(fileExtension)) {
       this.document.querySelector(`input[data-testid="file"]`).value = ''
@@ -35,7 +33,6 @@ export default class NewBill {
       error.style.color = '#FF0000'
       error.textContent = 'Veuillez sélectionner une image au format .jpg, .jpeg ou .png'
       this.document.querySelector(`input[data-testid="file"]`).parentNode.appendChild(error)
-      console.log('erreur')
     }
     else {
       formData.append('file', file)
@@ -50,14 +47,13 @@ export default class NewBill {
         }
       })
       .then(({fileUrl, key}) => {
-        console.log(fileUrl)
         this.billId = key
         this.fileUrl = fileUrl
         this.fileName = fileName
+
+        return {fileUrl, key}
       }).catch(error => console.error(error))
-      console.log('pas d\'erreur')
     }
-    console.log(formData.file)
     //ajouté/////////////////////////////////////////////////////////////
 
 
@@ -79,14 +75,12 @@ export default class NewBill {
       fileName: this.fileName,
       status: 'pending'
     }
-    console.log(bill)
     this.updateBill(bill)
     this.onNavigate(ROUTES_PATH['Bills'])
   }
 
   // not need to cover this function by tests
   updateBill = (bill) => {
-    console.log('///////////////////////////////////////////////////////////////////////////////////////////////////////////')
     if (this.store) {
       this.store
       .bills()

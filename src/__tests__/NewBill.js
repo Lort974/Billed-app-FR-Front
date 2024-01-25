@@ -5,25 +5,18 @@
 import { screen } from "@testing-library/dom"
 import NewBillUI from "../views/NewBillUI.js"
 import NewBill from "../containers/NewBill.js"
-import updateBill from "../containers/NewBill.js"
 
-import {localStorageMock} from "../__mocks__/localStorage.js";
-import router from "../app/Router"
+import {localStorageMock} from "../__mocks__/localStorage.js"
 import { ROUTES, ROUTES_PATH } from "../constants/routes"
-import Logout from "./Logout.js"
-import userEvent from "@testing-library/user-event";
-import { fireEvent, getByTestId, render } from '@testing-library/react';
-import store from "../__mocks__/store.js"
+import userEvent from "@testing-library/user-event"
+import { fireEvent, getByTestId, render } from '@testing-library/react'
 
-import { bills } from "../fixtures/bills"
-
-
+import mockStore from "../__mocks__/store"
+import router from "../app/Router"
 
 describe("Given I am connected as an employee", () => {
   describe("When I am on NewBill Page", () => {
     test("Then the new bill form should be shown", () => {
-      /*const html = NewBillUI()
-      document.body.innerHTML = html*/
       //to-do write assertion
 
       // Mock localStorage
@@ -42,7 +35,6 @@ describe("Given I am connected as an employee", () => {
 
       // Simulate navigation to NewBill page
       window.onNavigate(ROUTES_PATH.NewBill)
-
 
       // select form
       const formNewBill = screen.getByTestId("form-new-bill")
@@ -83,7 +75,7 @@ describe("Given I am connected as an employee", () => {
   
       const fileInput = screen.getByTestId("file")
   
-      const file = new File(['fake file'], 'fakefile.fakextension', {type: 'text/plain'});
+      const file = new File(['fake file'], 'fakefile.fakextension', {type: 'text/plain'})
       const fileExtension = file.name.split(".")[1]
   
       expect(fileExtension).toBe("fakextension")
@@ -96,7 +88,7 @@ describe("Given I am connected as an employee", () => {
   })
   
   describe("When I fill the form correctly and send it", () => {
-    test("My new bill should be sent", () => {
+    test("Then my new bill should be sent", async () => {
       const onNavigate = (pathname) => {
         document.body.innerHTML = ROUTES({ pathname })
       }
@@ -106,7 +98,6 @@ describe("Given I am connected as an employee", () => {
         type: 'Employee',
         email: 'employee@test.tld'
       }))
-      console.log(JSON.parse(localStorage.getItem("user")))
   
       // Create root div and append to body
       const root = document.createElement("div")
@@ -120,25 +111,13 @@ describe("Given I am connected as an employee", () => {
       window.onNavigate(ROUTES_PATH.NewBill)
       
       document.body.innerHTML = NewBillUI()
-  
-      const mockStore = {
-        bills: jest.fn().mockReturnValue({
-          list: jest.fn().mockResolvedValue([]), // retourne une promesse résolue avec un tableau vide
-          create: jest.fn().mockResolvedValue({fileUrl: 'url/to/file', key: 'key'}), // retourne une promesse résolue avec un objet
-          update: jest.fn().mockResolvedValue({data: 'data', selector: 'selector'}),
-        }),
-        then: jest.fn(),
-      };
 
       const newbill = new NewBill({
         document, onNavigate, store: mockStore, localStorage: window.localStorage
       })
 
-      // Mock functions
-      //const updateBill = jest.fn((e) => newbill.updateBill());
-
-      // Espionnez la méthode updateBill de l'instance
-      jest.spyOn(newbill, 'updateBill');
+      // Espionner la méthode updateBill de l'instance
+      jest.spyOn(newbill, 'updateBill')
 
       const handleSubmit = jest.fn((e) => newbill.handleSubmit(e))
       const formNewBill = screen.getByTestId("form-new-bill")
@@ -184,47 +163,79 @@ describe("Given I am connected as an employee", () => {
   
       const fileInput = screen.getByTestId("file")
   
-      const file = new File(['Test file'], 'testfile.png', {type: 'image/png'});
-  
+      const file = new File(['Test file'], 'testfile.png', {type: 'image/png'})
+      
       fileInput.addEventListener('change', handleChangeFile)
       userEvent.upload(fileInput, file)
   
       expect(handleChangeFile).toHaveBeenCalled()
 
-
-
-      expect(fileInput.files[0]).toStrictEqual(file);
-      expect(fileInput.files.item(0)).toStrictEqual(file);
-      expect(fileInput.files).toHaveLength(1);
-
-      //datas
-      /*const bill = {
-        email: 'employee@test.tld',
-        type: screen.getByTestId("expense-type").value,
-        name:  screen.getByTestId("expense-name").value,
-        amount: parseInt(screen.getByTestId("amount").value),
-        date:  screen.getByTestId("datepicker").value,
-        vat: screen.getByTestId("vat").value,
-        pct: parseInt(screen.getByTestId("pct").value) || 20,
-        commentary: screen.getByTestId("commentary").value,
-        fileUrl: fileUrl,
-        fileName: file,
-        status: 'pending'
-      }*/
-
-      //console.log(bill)
-
-      // Launch post
-      /*const submitButton = document.getElementById("btn-send-bill")
-      userEvent.click(submitButton)*/
-      //updateBillMock(bill)
-      //updateBill()
-      //userEvent.click(submitButton)
+      expect(fileInput.files[0]).toStrictEqual(file)
+      expect(fileInput.files.item(0)).toStrictEqual(file)
+      expect(fileInput.files).toHaveLength(1)
+      
       fireEvent.submit(formNewBill)
 
-      // Check if updateBill was called with the right data
-      expect(newbill.updateBill).toHaveBeenCalled();
-
+      // Check if updateBill was called
+      expect(newbill.updateBill).toHaveBeenCalled()
     })
   })
+
+  describe("When I pick a file", () => {
+    test('Then a post call happens in NewBill', () => {
+      const onNavigate = (pathname) => {
+       document.body.innerHTML = ROUTES({ pathname })
+     }
+     
+     Object.defineProperty(window, 'localStorage', { value: localStorageMock })
+     window.localStorage.setItem('user', JSON.stringify({
+       type: 'Employee',
+       email: 'employee@test.tld'
+     }))
+ 
+     // Create root div and append to body
+     const root = document.createElement("div")
+     root.setAttribute("id", "root")
+     document.body.append(root)
+ 
+     // Start router
+     router()
+ 
+     // Simulate navigation to NewBill page
+     window.onNavigate(ROUTES_PATH.NewBill)
+     
+     document.body.innerHTML = NewBillUI()
+ 
+     // Valeur de retour attendue
+     const mockData = {fileUrl: 'https://localhost:3456/images/test.jpg', key: '1234'}
+
+     // Mocker un fichier
+     const mockFile = new File(['file'], 'test.jpg', { type: 'image/jpeg' })
+ 
+     // Création d'une instance de NewBill
+     const newBill = new NewBill({
+       document,
+       onNavigate,
+       store: mockStore,
+       localStorage: window.localStorage,
+     })
+ 
+     //SIMULER LE CHANGEMENT DE FICHIER
+ 
+     const handleChangeFile = jest.fn((e) => newBill.handleChangeFile(e))
+ 
+     const fileInput = screen.getByTestId("file")
+ 
+     fileInput.addEventListener('change', handleChangeFile)
+     userEvent.upload(fileInput, mockFile)
+ 
+     expect(handleChangeFile).toHaveBeenCalled()
+   
+     // Vérification que les données renvoyées correspondent à mockData
+     return newBill.store.bills().create().then(data => {
+       expect(data).toEqual(mockData)
+     })
+   })
+  })
+  
 })

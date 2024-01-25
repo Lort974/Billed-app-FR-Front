@@ -9,16 +9,10 @@ import Bills from "../containers/Bills.js"
 import { ROUTES_PATH } from "../constants/routes.js";
 import {localStorageMock} from "../__mocks__/localStorage.js";
 
-
-
-/*import userEvent from '@testing-library/user-event'
-import Bills from "../containers/Bills.js"
-import { ROUTES } from "../constants/routes"*/
 import mockStore from "../__mocks__/store"
 import router from "../app/Router"
 
 jest.mock("../app/store", () => mockStore)
-
 
 import '@testing-library/jest-dom/extend-expect'
 import userEvent from "@testing-library/user-event";
@@ -50,7 +44,7 @@ describe("Given I am connected as an employee", () => {
       expect(dates).toEqual(datesSorted)
     })
     describe("When I clic on the view bill eye", () => {
-      test("Then I should see the bill details", async () => {
+      test("Then I should see the bill proof", async () => {
         const onNavigate = (pathname) => {
           document.body.innerHTML = ROUTES({ pathname })
         }
@@ -78,6 +72,7 @@ describe("Given I am connected as an employee", () => {
         
         document.body.innerHTML = BillsUI({ data: billsData, loading: false, error: null });
   
+        //Mocker les méthodes de jQuerry
         global.$ = jest.fn().mockReturnValue({
           modal: jest.fn(),
           click: jest.fn(),
