@@ -67,7 +67,7 @@ describe("Given I am connected as an employee", () => {
           fileUrl: 'fakeUrl',
         }];
     
-        // Simulate navigation to NewBill page
+        // Simulate navigation to Bills page
         window.onNavigate(ROUTES_PATH.Bills)
         
         document.body.innerHTML = BillsUI({ data: billsData, loading: false, error: null });

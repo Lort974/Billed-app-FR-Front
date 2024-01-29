@@ -5,7 +5,7 @@ import LoadingPage from "./LoadingPage.js"
 import Actions from './Actions.js'
 
 const row = (bill) => {
-  return (`
+  return bill.name ? (`
     <tr>
       <td>${bill.type}</td>
       <td>${bill.name}</td>
@@ -16,7 +16,7 @@ const row = (bill) => {
         ${Actions(bill.fileUrl)}
       </td>
     </tr>
-    `)
+    `) : ('')
   }
 
 const rows = (data) => {
